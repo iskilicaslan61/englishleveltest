@@ -81,12 +81,12 @@ document.getElementById('test-form').addEventListener('submit', async function(e
   });
 
   let level;
-  if (score <= 1) level = "A1";
-  else if (score === 2) level = "A2";
-  else if (score === 3) level = "B1";
-  else if (score === 4) level = "B2";
-  else if (score === 5) level = "C1";
-  else level = "C2";
+  if (score >= 0 && score <= 15) level = "A1"; // Beginner
+  else if (score >= 16 && score <= 24) level = "A2"; // Elementary
+  else if (score >= 25 && score <= 31) level = "B1"; // Intermediate
+  else if (score >= 32 && score <= 36) level = "B2"; // Upper-Intermediate
+  else if (score >= 37 && score <= 40) level = "B2+"; // Advanced
+  else level = "Invalid score"; // Handle scores outside 0-40
 
   document.getElementById('test-section').classList.add('hidden');
   document.getElementById('results-section').classList.remove('hidden');
