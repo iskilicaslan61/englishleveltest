@@ -1,73 +1,53 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 import smtplib
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
 
 # .env dosyasını yükle
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:8080", "http://127.0.0.1:5533", "http://localhost:5533"])
-
-# Ortam değişkenlerini kontrol et
-REQUIRED_ENV_VARS = ['GMAIL_USER', 'GMAIL_PASS', 'TEACHER_EMAIL']
-missing = [var for var in REQUIRED_ENV_VARS if var not in os.environ]
-if missing:
-    raise EnvironmentError(f"Missing required env vars: {', '.join(missing)}")
-
-GMAIL_USER = os.environ['GMAIL_USER']
-GMAIL_PASS = os.environ['GMAIL_PASS']
-TEACHER_EMAIL = os.environ['TEACHER_EMAIL']
+CORS(app)
 
 @app.route('/')
 def home():
-    return jsonify({"message": "English Level Placement Test Backend is running."})
+    return render_template('index.html')  # templates/index.html render edilir
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
-    data = request.get_json()
-    name = data.get('name', '').strip()
-    score = data.get('score')
-    level = data.get('level')
-
-    if not name or not isinstance(name, str) or len(name) > 100:
-        return jsonify({"error": "Invalid or missing student name (max 100 characters)."}), 400
-
-    if not isinstance(score, int) or score < 0 or score > 6:
-        return jsonify({"error": "Invalid score: must be an integer between 0 and 6."}), 400
-
-    if level not in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']:
-        return jsonify({"error": "Invalid level: must be A1, A2, B1, B2, C1, or C2."}), 400
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"English Placement Test Results for {name}"
-    msg["From"] = GMAIL_USER
-    msg["To"] = TEACHER_EMAIL
-
-    text = f"Student: {name}\nScore: {score} out of 6\nLevel: {level}"
-    html = f"""
-    <h2>English Placement Test Results</h2>
-    <p><strong>Student:</strong> {name}</p>
-    <p><strong>Score:</strong> {score} out of 6</p>
-    <p><strong>Level:</strong> {level}</p>
-    """
-
-    msg.attach(MIMEText(text, "plain"))
-    msg.attach(MIMEText(html, "html"))
-
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        data = request.get_json()
+        name = data.get('name')
+        score = data.get('score')
+        level = data.get('level')
+
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        smtp_user = os.getenv("GMAIL_USER")
+        smtp_pass = os.getenv("GMAIL_PASS")
+        to_email = os.getenv("TEACHER_EMAIL")
+
+        subject = "New Placement Test Result"
+        body = f"Student: {name}\nScore: {score}/6\nLevel: {level}"
+
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = smtp_user
+        msg['To'] = to_email
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, TEACHER_EMAIL, msg.as_string())
-        print(f"📧 Email sent to {TEACHER_EMAIL} for {name}")
-        return jsonify({"message": "Email sent successfully."})
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+
+        return jsonify({"message": "Email sent successfully!"}), 200
+
     except Exception as e:
         print("❌ Error sending email:", e)
-        return jsonify({"error": "Failed to send email.", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(port=3000, debug=True)
+@app.route('/health')
+def health():
+    return jsonify({"message": "English Level Placement Test Backend is running."})
