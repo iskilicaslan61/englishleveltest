@@ -90,7 +90,7 @@ document.getElementById('test-form').addEventListener('submit', async function(e
 
   document.getElementById('test-section').classList.add('hidden');
   document.getElementById('results-section').classList.remove('hidden');
-  document.getElementById('student-result').innerText = `${name}, your English level is: ${level} (Score: ${score}/6)`;
+  document.getElementById('student-result').innerText = `${name}, your English level is: ${level} (Score: ${score}/40)`;
 
   try {
     const response = await fetch('/send-email', {

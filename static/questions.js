@@ -5,7 +5,7 @@ const questions = [
   { text: "They ___ from Spain.", options: ["is", "are", "do"], correct: "are", level: "A1" },
   { text: "___ he play tennis?", options: ["Where", "Does", "Do"], correct: "Does", level: "A1" },
   { text: "We ___ live in a flat.", options: ["don't", "hasn't", "doesn't"], correct: "don't", level: "A1" },
-  { text: "What do you do? I'm ___ student.", options: ["the", "a", "the"], correct: "a", level: "A1" },
+  { text: "What do you do? I'm ___ student.", options: ["an", "a", "the"], correct: "a", level: "A1" },
   { text: "Have you got a pen? Yes, I ___.", options: ["am", "have", "got"], correct: "have", level: "A1" },
   { text: "I ___ there for a long time.", options: ["lived", "living", "live"], correct: "lived", level: "A2" },
   { text: "Those shoes are very ___.", options: ["expensive", "a lot", "cost"], correct: "expensive", level: "A1" },
