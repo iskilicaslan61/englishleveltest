@@ -93,7 +93,7 @@ document.getElementById('test-form').addEventListener('submit', async function(e
   document.getElementById('student-result').innerText = `${name}, your English level is: ${level} (Score: ${score}/6)`;
 
   try {
-    const response = await fetch('https://englishleveltest.onrender.com/send-email', {
+    const response = await fetch('/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, score, level })
@@ -114,3 +114,5 @@ document.getElementById('test-form').addEventListener('submit', async function(e
     selectedAnswers = {};
   }
 });
+document.getElementById('start-btn').addEventListener('click', startTest);
+document.getElementById('back-btn').addEventListener('click', goBack);
