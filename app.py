@@ -33,7 +33,7 @@ def send_email():
 📘 English Level Placement Test Report
 
 👤 Student Name: {name}
-📊 Score Achieved: {score} out of 6
+📊 Score Achieved: {score} out of 40
 🧠 Assessed English Level: {level}
 
 This report summarizes the results of the English Level Placement Test completed by the student. The level indicated reflects their current proficiency based on their responses to grammar and structure-based questions.
