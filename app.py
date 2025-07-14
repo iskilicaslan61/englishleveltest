@@ -35,7 +35,21 @@ def send_email():
 
         # Mail içeriği
         subject = "📘 New Placement Test Result"
-        body = f"👤 Student: {name}\n📊 Score: {score}/6\n🧠 Level: {level}"
+        body = f"""
+            📘 English Level Placement Test Report
+
+            👤 Student Name: {name}
+            📊 Score Achieved: {score} out of 6
+            🧠 Assessed English Level: {level}
+
+            This report summarizes the results of the English Level Placement Test completed by the student. The level indicated reflects their current proficiency based on their responses to grammar and structure-based questions.
+
+            Please review the student's performance to determine the appropriate course or support they may need.
+
+            Best regards,  
+            English Placement Test System
+            """
+
 
         msg = MIMEText(body)
         msg['Subject'] = subject
