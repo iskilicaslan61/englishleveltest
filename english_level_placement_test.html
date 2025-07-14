@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Level Placement Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #6ee7b7, #3b82f6);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Arial', sans-serif;
+    }
+    .question-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .question-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn {
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mx-auto p-6 max-w-2xl bg-white rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">English Level Placement Test</h1>
+    
+    <!-- Name Input Section -->
+    <div id="name-section" class="mb-6">
+      <label for="student-name" class="block text-lg font-medium text-gray-700 mb-2">Enter Your Name:</label>
+      <input type="text" id="student-name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Your full name" required>
+      <button onclick="startTest()" class="btn mt-4 w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700">Start Test</button>
+    </div>
+
+    <!-- Test Section -->
+    <div id="test-section" class="hidden">
+      <form id="test-form">
+        <p id="progress" class="text-lg text-gray-600 mb-4"></p>
+        <div id="questions" class="space-y-6">
+          <!-- Questions will be dynamically inserted here -->
+        </div>
+        <div class="mt-6 flex space-x-4">
+          <button type="button" onclick="goBack()" class="btn w-full bg-gray-600 text-white p-3 rounded-lg hover:bg-gray-700">Back</button>
+          <button type="submit" id="submit-btn" class="btn w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700">Submit Test</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden mt-6 p-6 bg-gray-100 rounded-lg">
+      <h2 class="text-2xl font-bold text-center text-blue-600">Your Results</h2>
+      <p id="student-result" class="text-lg text-center mt-4"></p>
+      <p id="email-status" class="text-center mt-2 text-gray-600"></p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "I ___ to school every day.", options: ["go", "goes", "going"], correct: "go", level: "A1" },
+      { text: "She ___ in London last year.", options: ["live", "lived", "living"], correct: "lived", level: "A2" },
+      { text: "If I ___ you, I would study more.", options: ["am", "was", "were"], correct: "were", level: "B1" },
+      { text: "The book ___ by the time I arrived.", options: ["had been read", "was read", "is read"], correct: "had been read", level: "B2" },
+      { text: "His decision was ___ by economic factors.", options: ["driven", "driving", "drove"], correct: "driven", level: "C1" },
+      { text: "The issue remains contentious, ___?", options: ["does it", "doesn't it", "isn't it"], correct: "doesn't it", level: "C2" }
+    ];
+
+    let selectedAnswers = {}; // Store selected answers
+
+    function sanitizeInput(input) {
+      const div = document.createElement('div');
+      div.textContent = input;
+      return div.innerHTML;
+    }
+
+    function startTest() {
+      const nameInput = document.getElementById('student-name');
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert("Please enter your name!");
+        return;
+      }
+      // Enhanced XSS prevention
+      const sanitizedName = sanitizeInput(name);
+      if (sanitizedName !== name || name.match(/[<>\"&]/)) {
+        alert("Invalid characters in name. Please use letters, numbers, and spaces only.");
+        return;
+      }
+      document.getElementById('name-section').classList.add('hidden');
+      document.getElementById('test-section').classList.remove('hidden');
+
+      // Update progress
+      document.getElementById('progress').innerText = `Question 1 of ${questions.length}`;
+
+      // Shuffle questions
+      const shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+      const questionsDiv = document.getElementById('questions');
+      questionsDiv.innerHTML = ''; // Clear previous questions
+      shuffledQuestions.forEach((q, index) => {
+        const questionHTML = `
+          <div class="question-card p-6 bg-white border border-gray-200 rounded-lg shadow-md">
+            <p class="text-lg font-medium text-gray-800">${index + 1}. ${q.text}</p>
+            <div class="mt-4 space-y-2">
+              ${q.options.map(option => `
+                <label class="block">
+                  <input type="radio" name="q${index}" value="${option}" 
+                    ${selectedAnswers[`q${index}`] === option ? 'checked' : ''} 
+                    required class="mr-2" onchange="saveAnswer(${index}, this.value)">
+                  ${option}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        questionsDiv.innerHTML += questionHTML;
+      });
+    }
+
+    function saveAnswer(index, value) {
+      selectedAnswers[`q${index}`] = value; // Store selected answer
+    }
+
+    function goBack() {
+      document.getElementById('test-section').classList.add('hidden');
+      document.getElementById('name-section').classList.remove('hidden');
+      // Keep selectedAnswers intact to persist answers
+    }
+
+    document.getElementById('test-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      // Check if all questions are answered
+      for (let i = 0; i < questions.length; i++) {
+        if (!selectedAnswers[`q${i}`] && !document.querySelector(`input[name="q${i}"]:checked`)) {
+          alert(`Please answer question ${i + 1} before submitting.`);
+          return;
+        }
+      }
+      if (!confirm("Are you sure you want to submit your answers?")) {
+        return;
+      }
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.innerText = 'Submitting...';
+
+      const name = sanitizeInput(document.getElementById('student-name').value.trim());
+      let score = 0;
+      questions.forEach((q, index) => {
+        const selected = selectedAnswers[`q${index}`] || 
+                        (document.querySelector(`input[name="q${index}"]:checked`)?.value);
+        if (selected && selected === q.correct) {
+          score += 1;
+        }
+      });
+
+      // Determine level based on score
+      let level;
+      if (score <= 1) level = "A1";
+      else if (score === 2) level = "A2";
+      else if (score === 3) level = "B1";
+      else if (score === 4) level = "B2";
+      else if (score === 5) level = "C1";
+      else level = "C2";
+
+      // Display results
+      document.getElementById('test-section').classList.add('hidden');
+      document.getElementById('results-section').classList.remove('hidden');
+      document.getElementById('student-result').innerText = `${name}, your English level is: ${level} (Score: ${score}/6)`;
+
+      // Send results to backend
+      try {
+        const response = await fetch('http://localhost:3000/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, score, level })
+        });
+        if (response.ok) {
+          document.getElementById('email-status').innerText = "Results sent to your teacher!";
+        } else {
+          const errorData = await response.json();
+          document.getElementById('email-status').innerText = `Failed to send results: ${errorData.error || 'Unknown error'}`;
+        }
+      } catch (error) {
+        console.error('Error sending email:', error);
+        document.getElementById('email-status').innerText = "Error sending results: Network issue. Please try again.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.innerText = 'Submit Test';
+        selectedAnswers = {}; // Clear answers after submission
+      }
+    });
+  </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95efff933de253cf',t:'MTc1MjQ4NTM5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
