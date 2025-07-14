@@ -114,5 +114,3 @@ document.getElementById('test-form').addEventListener('submit', async function(e
     selectedAnswers = {};
   }
 });
-document.getElementById('start-btn').addEventListener('click', startTest);
-document.getElementById('back-btn').addEventListener('click', goBack);
